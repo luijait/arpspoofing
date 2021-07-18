@@ -9,4 +9,5 @@ else
    py2bin pyc arpspoofing.py
    chmod +x arpspoofing.pyc
    mv arpspoofing.pyc /bin/arpspoofing
+   echo "Enhorabuena ya puedes correr el script simplemente poniendo sudo arpspoofing 'ip victima' 'ip gateway' 'interfaz de red' "
 fi
