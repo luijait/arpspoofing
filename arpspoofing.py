@@ -1,5 +1,7 @@
 import scapy.all as scapy
 import time
+ip_objetivo = input('Introduce la ip de la victima: ')
+gateway_ip = input('Introduce la ip de la puerta de enlace: ')
 def cmac(ip):
     arp_request = scapy.ARP(pdst = ip)
 
@@ -27,9 +29,9 @@ def restaurartablas(ip_destino, ip_origen):
 
     scapy.send(paquete, verbose = False)
 
-ip_objetivo = "192.168.0.142"
+#ip_objetivo = "192.168.0.159" 
 
-gateway_ip = "192.168.0.1"
+#gateway_ip = "192.168.0.1"
 
 try:
 
