@@ -6,7 +6,7 @@ import scapy.all as scapy
 from scapy.all import srp,send,ARP
 import time
 def enable_ip_forwarding_mac():
-        os.system("net.inet.ip.forwarding=1")
+        os.system("sysctl -w net.inet.ip.forwarding=1")
 def enable_linux_route():
 
         path = '/proc/sys/net/ipv4/ip_forward'
